@@ -14,8 +14,7 @@ const StyledMainHeader = styled.section`
 `;
 
 interface Props {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  passType: string | number | undefined | {};
+  passType: React.ReactNode;
 }
 
 const TurnoverCategoriesHeader: React.FC<Props> = ({ passType }: Props) => {

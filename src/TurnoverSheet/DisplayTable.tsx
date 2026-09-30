@@ -1,10 +1,10 @@
-/* eslint-disable react/jsx-key */
 import { ReactElement } from 'react';
-import { useTable, Cell } from 'react-table';
+import { Cell, useTable } from '@tanstack/react-table';
 import styled from 'styled-components';
+import { features } from '../tableFeatures';
 import { StyledTable } from '../styles';
 import { columns } from './constants';
-import { TurnoverCategoriesType } from './types';
+import { TurnoverCategoriesType, TurnoverSubCategoriesType } from './types';
 import TurnoverCategoriesHeader from './TurnoverCategoriesHeader';
 import TurnoverCell from './TurnoverCell';
 import TurnoverTotalRow from './TurnoverTotalRow';
@@ -39,8 +39,8 @@ const StyledCells = styled.td`
   }
 `;
 
-const StyledHeader = styled.th<{ isTurnoverCategoriesHeader: boolean }>`
-  padding: ${(props): string | number => (props.isTurnoverCategoriesHeader ? 0 : '4px')};
+const StyledHeader = styled.th<{ $isTurnoverCategoriesHeader: boolean }>`
+  padding: ${(props): string | number => (props.$isTurnoverCategoriesHeader ? 0 : '4px')};
 
   :nth-child(2),
   :nth-child(3),
@@ -60,15 +60,17 @@ const StyledHeader = styled.th<{ isTurnoverCategoriesHeader: boolean }>`
   }
 `;
 
-const renderCell: (cell: Cell<TurnoverCategoriesType>) => ReactElement | null | undefined = cell => {
-  switch (cell.column.Header) {
+const renderCell: (cell: Cell<typeof features, TurnoverCategoriesType, unknown>) => ReactElement | null | undefined = (
+  cell,
+) => {
+  switch (cell.column.columnDef.header) {
     case '名字':
     case '其他失誤':
     case '總計次數':
     case '總失分':
-      return <span>{cell.value}</span>;
+      return <span>{cell.getValue() as string | number}</span>;
     default:
-      return <TurnoverCell value={cell.value} />;
+      return <TurnoverCell value={cell.getValue() as TurnoverSubCategoriesType} />;
   }
 };
 
@@ -77,35 +79,25 @@ interface Props {
 }
 
 const DisplayTable: React.FC<Props> = ({ turnoverData }: Props) => {
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
-    columns,
-    data: turnoverData,
-  });
+  const table = useTable({ features, columns, data: turnoverData });
 
   return (
     <StyledTable>
-      <table {...getTableProps()}>
+      <table>
         <thead>
-          {// Loop over the header rows
-          headerGroups.map(headerGroup => (
-            // Apply the header row props
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {// Loop over the headers in each row
-              headerGroup.headers.map(column => {
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                const label = header.column.columnDef.header;
                 const isTurnoverCategoriesHeader =
-                  column.Header === 'Drop' ||
-                  column.Header === '非攻擊性傳球' ||
-                  column.Header === '攻擊性傳球' ||
-                  column.Header === '禁區傳球';
+                  label === 'Drop' || label === '非攻擊性傳球' || label === '攻擊性傳球' || label === '禁區傳球';
 
                 return (
-                  // Apply the header cell props
-                  <StyledHeader {...column.getHeaderProps()} isTurnoverCategoriesHeader={isTurnoverCategoriesHeader}>
-                    {// Render the header
-                    isTurnoverCategoriesHeader ? (
-                      <TurnoverCategoriesHeader passType={column.Header} />
+                  <StyledHeader key={header.id} $isTurnoverCategoriesHeader={isTurnoverCategoriesHeader}>
+                    {isTurnoverCategoriesHeader ? (
+                      <TurnoverCategoriesHeader passType={String(label)} />
                     ) : (
-                      column.render('Header')
+                      <table.FlexRender header={header} />
                     )}
                   </StyledHeader>
                 );
@@ -113,24 +105,15 @@ const DisplayTable: React.FC<Props> = ({ turnoverData }: Props) => {
             </tr>
           ))}
         </thead>
-        {/* Apply the table body props */}
-        <tbody {...getTableBodyProps()}>
-          {// Loop over the table rows
-          rows.map(row => {
-            // Prepare the row for display
-            prepareRow(row);
-            return (
-              // Apply the row props
-              <tr {...row.getRowProps()}>
-                {// Loop over the rows cells
-                row.cells.map(cell => {
-                  // Apply the cell props
-                  return <StyledCells {...cell.getCellProps()}>{renderCell(cell)}</StyledCells>;
-                })}
-              </tr>
-            );
-          })}
-          <TurnoverTotalRow rows={rows} />
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getAllCells().map((cell) => (
+                <StyledCells key={cell.id}>{renderCell(cell)}</StyledCells>
+              ))}
+            </tr>
+          ))}
+          <TurnoverTotalRow turnoverData={turnoverData} />
         </tbody>
       </table>
     </StyledTable>

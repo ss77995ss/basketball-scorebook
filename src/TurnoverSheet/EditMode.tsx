@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { update, propEq, findIndex, prop, prepend, remove } from 'ramda';
+import { update, prop, prepend, remove } from 'ramda';
 import PlayerSelector from './PlayerSelector';
 import TurnoverCategoriesSelector from './TurnoverCategoriesSelector';
 import { TurnoverCategoriesType, StatHistoryType } from './types';
@@ -38,8 +38,8 @@ const EditMode: React.FC<Props> = ({ playerList, statHistory, setTurnoverData, s
       const inputLostPoints = prompt('失分', '2');
       const resolvedLostPoints = inputLostPoints ? parseInt(inputLostPoints, 10) : 0;
 
-      setTurnoverData(prev => {
-        const index = findIndex(propEq('playerName', playerName.value))(prev);
+      setTurnoverData((prev) => {
+        const index = prev.findIndex((row) => row.playerName === playerName.value);
         const targetPlayer = prop(turnoverCategory.value, prev[index]);
         const targetNumber = prop(turnoverSubCategory.value, targetPlayer);
         const newData = {
@@ -68,8 +68,8 @@ const EditMode: React.FC<Props> = ({ playerList, statHistory, setTurnoverData, s
         ),
       );
     } else {
-      setTurnoverData(prev => {
-        const index = findIndex(propEq('playerName', playerName.value))(prev);
+      setTurnoverData((prev) => {
+        const index = prev.findIndex((row) => row.playerName === playerName.value);
         const targetPlayer = prop(turnoverCategory.value, prev[index]);
         let newData;
 
@@ -115,8 +115,8 @@ const EditMode: React.FC<Props> = ({ playerList, statHistory, setTurnoverData, s
     if (window.confirm('確定要刪除此紀錄嗎？')) {
       const { playerName, turnoverCategory, turnoverSubCategory, value } = stat;
 
-      setTurnoverData(prev => {
-        const index = findIndex(propEq('playerName', playerName))(prev);
+      setTurnoverData((prev) => {
+        const index = prev.findIndex((row) => row.playerName === playerName);
         const targetPlayer = prop(turnoverCategory, prev[index]);
         let newData;
 
@@ -159,7 +159,7 @@ const EditMode: React.FC<Props> = ({ playerList, statHistory, setTurnoverData, s
         return prev;
       });
 
-      setStatHistory(prev => remove(index, 1, prev));
+      setStatHistory((prev) => remove(index, 1, prev));
     }
   };
 

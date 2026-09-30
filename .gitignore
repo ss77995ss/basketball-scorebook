@@ -60,3 +60,10 @@ typings/
 
 # next.js build output
 .next
+
+# env
+.env*.local
+
+# next
+/.next/
+next-env.d.ts

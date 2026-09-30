@@ -1,11 +1,10 @@
-import { Row } from 'react-table';
 import styled from 'styled-components';
 import TurnoverCell from './TurnoverCell';
 import { TurnoverCategoriesType } from './types';
 import { initialSingleData } from './constants';
 
 interface Props {
-  rows: Row<TurnoverCategoriesType>[];
+  turnoverData: TurnoverCategoriesType[];
 }
 
 const StyledRow = styled.tr`
@@ -44,10 +43,8 @@ const StyledCells = styled.td`
   }
 `;
 
-const TurnoverTotalRow: React.FC<Props> = ({ rows }: Props) => {
-  const turnoverTotalList = rows.reduce((list, row) => {
-    const { values } = row;
-
+const TurnoverTotalRow: React.FC<Props> = ({ turnoverData }: Props) => {
+  const turnoverTotalList = turnoverData.reduce((list, values) => {
     return {
       ...list,
       drop: {
@@ -78,14 +75,14 @@ const TurnoverTotalRow: React.FC<Props> = ({ rows }: Props) => {
 
   return (
     <StyledRow>
-      {Object.keys(turnoverTotalList).map(key => {
+      {Object.keys(turnoverTotalList).map((key) => {
         switch (key) {
           case 'drop':
           case 'nonOffensivePass':
           case 'offensivePass':
           case 'paintPass':
             return (
-              <StyledCells>
+              <StyledCells key={key}>
                 <TurnoverCell value={turnoverTotalList[key]} />
               </StyledCells>
             );
@@ -94,7 +91,7 @@ const TurnoverTotalRow: React.FC<Props> = ({ rows }: Props) => {
           case 'totalTurnovers':
           case 'totalLostPoints':
             return (
-              <StyledCells>
+              <StyledCells key={key}>
                 <span>{turnoverTotalList[key]}</span>
               </StyledCells>
             );

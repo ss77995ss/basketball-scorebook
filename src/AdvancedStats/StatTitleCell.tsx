@@ -1,48 +1,41 @@
-import { Cell } from 'react-table';
 import { StatType } from './types';
-import { lensProp, pick, set } from 'ramda';
 import { StyledTitleCell } from '../styles';
-import { useStatsDispatch } from './hooks/statData';
+import { StatValueType, useStatsDispatch } from './hooks/statData';
 
 interface Props {
-  cell: Cell<StatType>;
+  statInfo: StatType['statInfo'];
+  rowIndex: number;
+  columnId: string;
 }
 
-const StatTitleCell: React.FC<Props> = ({ cell }: Props) => {
-  const {
-    value,
-    row: { index },
-    column: { id },
-  } = cell;
-  const { name, linkName, title } = value;
+const StatTitleCell: React.FC<Props> = ({ statInfo, rowIndex, columnId }: Props) => {
+  const { name, linkName, title } = statInfo;
 
   const statsDispatch = useStatsDispatch();
 
-  const updateStatsName: (
-    value:
-      | { count: number; points: number }
-      | number
-      | { name: string; title: string | { points: string; count: string } },
-  ) => void = (value) => {
+  const updateStatsName: (value: StatValueType) => void = (value) => {
     statsDispatch({
       type: 'UPDATE_STATS_NAME',
       params: {
         team: '',
-        rowIndex: index,
-        columnId: id,
+        rowIndex,
+        columnId,
         value,
       },
     });
   };
 
-  const handleOnClick = (key: string) => (): void => {
-    const targetValue = typeof title === 'object' && key !== 'name' ? pick([key], title)[key] : pick([key], value)[key];
-    const newKeyName = prompt('輸入新的名稱', targetValue) || targetValue;
-    const targetLen = lensProp<Record<string, string>, string>(key);
+  const rename = (current: string): string => prompt('輸入新的名稱', current) || current;
 
-    typeof title === 'object' && key !== 'name'
-      ? updateStatsName({ ...value, title: set(targetLen, newKeyName, title) })
-      : updateStatsName(set(targetLen, newKeyName, value));
+  // 'points'/'count' rename the two halves of a split title, everything else renames statInfo itself
+  const handleOnClick = (key: 'name' | 'title' | 'points' | 'count') => (): void => {
+    if (typeof title === 'object' && (key === 'points' || key === 'count')) {
+      updateStatsName({ ...statInfo, title: { ...title, [key]: rename(title[key]) } });
+      return;
+    }
+
+    const current = key === 'name' ? name : String(title);
+    updateStatsName({ ...statInfo, [key]: rename(current) });
   };
 
   return (

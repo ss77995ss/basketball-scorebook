@@ -46,12 +46,12 @@ export const StyledTable = styled.div`
   }
 `;
 
-export const StyledCell = styled.div<{ readOnly: boolean }>`
+export const StyledCell = styled.div<{ $readOnly: boolean }>`
   font-weight: bold;
   user-select: none;
   text-align: center;
   padding: 4rem;
-  background-color: ${(props): string => (props.readOnly ? 'white' : '#ddddff')};
+  background-color: ${(props): string => (props.$readOnly ? 'white' : '#ddddff')};
 
   @media (min-width: 600px) and (max-width: 900px) {
     padding: 2.5rem;

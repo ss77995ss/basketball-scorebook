@@ -1,4 +1,5 @@
-import { Column } from 'react-table';
+import { createColumnHelper } from '@tanstack/react-table';
+import { features } from '../tableFeatures';
 import { StatType } from './types';
 
 export const STAT_TYPE = {
@@ -17,32 +18,16 @@ export const DEFAULT_TEAM_NAME = {
   AWAY: '對手',
 };
 
-export const columns: Array<Column<StatType>> = [
-  {
-    Header: '項目',
-    accessor: 'statInfo',
-  },
-  {
-    Header: 'Q1',
-    accessor: 'q1',
-  },
-  {
-    Header: 'Q2',
-    accessor: 'q2',
-  },
-  {
-    Header: 'Q3',
-    accessor: 'q3',
-  },
-  {
-    Header: 'Q4',
-    accessor: 'q4',
-  },
-  {
-    Header: '總計',
-    accessor: 'total',
-  },
-];
+const helper = createColumnHelper<typeof features, StatType>();
+
+export const columns = helper.columns([
+  helper.accessor('statInfo', { header: '項目' }),
+  helper.accessor('q1', { header: 'Q1' }),
+  helper.accessor('q2', { header: 'Q2' }),
+  helper.accessor('q3', { header: 'Q3' }),
+  helper.accessor('q4', { header: 'Q4' }),
+  helper.accessor('total', { header: '總計' }),
+]);
 
 export const initialData: Array<StatType> = [
   {
@@ -242,70 +227,6 @@ export const initialData: Array<StatType> = [
       type: STAT_TYPE.POINTS_AND_COUNT,
       name: '失誤',
       linkName: '失誤',
-      title: {
-        points: DEFAULT_TITLE.LOST_POINTS,
-        count: DEFAULT_TITLE.COUNT,
-      },
-      isSwipeable: true,
-    },
-    q1: {
-      count: 0,
-      points: 0,
-    },
-    q2: {
-      count: 0,
-      points: 0,
-    },
-    q3: {
-      count: 0,
-      points: 0,
-    },
-    q4: {
-      count: 0,
-      points: 0,
-    },
-    total: {
-      count: 0,
-      points: 0,
-    },
-  },
-  {
-    statInfo: {
-      type: STAT_TYPE.POINTS_AND_COUNT,
-      name: '被搶籃板後被快攻',
-      linkName: '被搶籃板後被快攻',
-      title: {
-        points: DEFAULT_TITLE.LOST_POINTS,
-        count: DEFAULT_TITLE.COUNT,
-      },
-      isSwipeable: true,
-    },
-    q1: {
-      count: 0,
-      points: 0,
-    },
-    q2: {
-      count: 0,
-      points: 0,
-    },
-    q3: {
-      count: 0,
-      points: 0,
-    },
-    q4: {
-      count: 0,
-      points: 0,
-    },
-    total: {
-      count: 0,
-      points: 0,
-    },
-  },
-  {
-    statInfo: {
-      type: STAT_TYPE.POINTS_AND_COUNT,
-      name: '進球後被快攻',
-      linkName: '進球後被快攻',
       title: {
         points: DEFAULT_TITLE.LOST_POINTS,
         count: DEFAULT_TITLE.COUNT,

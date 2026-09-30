@@ -1,16 +1,14 @@
 import { createContext, ReactNode, useContext, useReducer, ReactComponentElement } from 'react';
-import { Column } from 'react-table';
 import { columns, initialData } from '../constants';
 import { StatType } from '../types';
+
+export type StatValueType = { count: number; points: number } | number | StatType['statInfo'];
 
 type UpdateParamsType = {
   team: string;
   rowIndex: number;
   columnId: string;
-  value:
-    | { count: number; points: number }
-    | number
-    | { name: string; title: string | { points: string; count: string } };
+  value: StatValueType;
 };
 
 type Action =
@@ -18,7 +16,7 @@ type Action =
   | { type: 'UPDATE_STATS_NAME'; params: UpdateParamsType }
   | { type: 'RESET' };
 type Dispatch = (action: Action) => void;
-type State = { columns: Array<Column<StatType>>; home: Array<StatType>; away: Array<StatType> };
+type State = { columns: typeof columns; home: Array<StatType>; away: Array<StatType> };
 type StatsProviderProps = { children: ReactNode };
 
 const StatsStateContext = createContext<State | undefined>(undefined);

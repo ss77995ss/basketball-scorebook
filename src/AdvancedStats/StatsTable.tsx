@@ -1,6 +1,6 @@
-/* eslint-disable react/jsx-key */
 import { ReactElement, useState } from 'react';
-import { useTable, Cell } from 'react-table';
+import { Cell, useTable } from '@tanstack/react-table';
+import { features } from '../tableFeatures';
 import { StyledTable } from '../styles';
 import { useStatsState } from './hooks/statData';
 import { StatType } from './types';
@@ -12,27 +12,42 @@ import TotalCell from './TotalCell';
 import TotalCellWithCount from './TotalCellWithCount';
 import ReadOnlyCell from './ReadOnlyCell';
 
-const renderCell: (quarter: string, team: string, cell: Cell<StatType>) => ReactElement | null | undefined = (
+type StatCellType = Cell<typeof features, StatType, unknown>;
+type QuarterValue = StatType['q1'];
+
+const renderCell: (quarter: string, team: string, cell: StatCellType) => ReactElement | null | undefined = (
   quarter,
   team,
   cell,
 ) => {
-  switch (cell.column.Header) {
+  const { statInfo } = cell.row.original;
+  const rowIndex = cell.row.index;
+  const columnId = cell.column.id;
+
+  switch (cell.column.columnDef.header) {
     case '項目':
-      return <StatTitleCell cell={cell} />;
+      return <StatTitleCell statInfo={statInfo} rowIndex={rowIndex} columnId={columnId} />;
     case '總計':
-      return cell.row.cells[0].value.type === STAT_TYPE.POINTS_AND_COUNT ? (
-        <TotalCellWithCount row={cell.row} />
+      return statInfo.type === STAT_TYPE.POINTS_AND_COUNT ? (
+        <TotalCellWithCount row={cell.row.original} />
       ) : (
-        <TotalCell row={cell.row} />
+        <TotalCell row={cell.row.original} />
       );
     default: {
-      if (cell.column.id !== quarter) return <ReadOnlyCell cell={cell} />;
+      const value = cell.getValue() as QuarterValue;
 
-      return cell.row.cells[0].value.type === STAT_TYPE.POINTS_AND_COUNT ? (
-        <StatCellWithCount cell={cell} team={team} isSwipeable={cell.row.cells[0].value.isSwipeable} />
+      if (columnId !== quarter) return <ReadOnlyCell value={value} />;
+
+      return statInfo.type === STAT_TYPE.POINTS_AND_COUNT ? (
+        <StatCellWithCount
+          value={value as { count: number; points: number }}
+          rowIndex={rowIndex}
+          columnId={columnId}
+          team={team}
+          isSwipeable={statInfo.isSwipeable}
+        />
       ) : (
-        <StatCell cell={cell} team={team} />
+        <StatCell value={value as number} rowIndex={rowIndex} columnId={columnId} team={team} />
       );
     }
   }
@@ -46,75 +61,40 @@ const StatTable: React.FC<Props> = ({ team }: Props) => {
   const [quarter, setQuarter] = useState('q1');
   const { columns, home, away } = useStatsState();
   const data = team === 'home' ? home : away;
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
-    columns,
-    data,
-  });
+  const table = useTable({ features, columns, data });
 
   return (
     <StyledTable>
       <h3>+/- by direction Up: +3, Down: -3, Left: -2, Right: +2, Click: +1, DoubleClick: -1</h3>
-      <table {...getTableProps()}>
+      <table>
         <thead>
-          {
-            // Loop over the header rows
-            headerGroups.map((headerGroup) => (
-              // Apply the header row props
-              <tr {...headerGroup.getHeaderGroupProps()}>
-                {
-                  // Loop over the headers in each row
-                  headerGroup.headers.map((column) => {
-                    const headerProps =
-                      column.Header !== '項目' && column.Header !== '總計'
-                        ? {
-                            ...column.getHeaderProps(),
-                            style: { cursor: 'pointer' },
-                            onClick: (): void => setQuarter(column.id),
-                          }
-                        : column.getHeaderProps();
-                    // Apply the header cell props
-                    return (
-                      <th {...headerProps}>
-                        {
-                          // Render the header
-                          column.render('Header')
-                        }
-                      </th>
-                    );
-                  })
-                }
-              </tr>
-            ))
-          }
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                const label = header.column.columnDef.header;
+                const isQuarter = label !== '項目' && label !== '總計';
+
+                return (
+                  <th
+                    key={header.id}
+                    style={isQuarter ? { cursor: 'pointer' } : undefined}
+                    onClick={isQuarter ? (): void => setQuarter(header.column.id) : undefined}
+                  >
+                    <table.FlexRender header={header} />
+                  </th>
+                );
+              })}
+            </tr>
+          ))}
         </thead>
-        {/* Apply the table body props */}
-        <tbody {...getTableBodyProps()}>
-          {
-            // Loop over the table rows
-            rows.map((row) => {
-              // Prepare the row for display
-              prepareRow(row);
-              return (
-                // Apply the row props
-                <tr {...row.getRowProps()}>
-                  {
-                    // Loop over the rows cells
-                    row.cells.map((cell) => {
-                      // Apply the cell props
-                      return (
-                        <td {...cell.getCellProps()}>
-                          {
-                            // Render the cell contents
-                            renderCell(quarter, team, cell)
-                          }
-                        </td>
-                      );
-                    })
-                  }
-                </tr>
-              );
-            })
-          }
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getAllCells().map((cell) => (
+                <td key={cell.id}>{renderCell(quarter, team, cell)}</td>
+              ))}
+            </tr>
+          ))}
         </tbody>
       </table>
     </StyledTable>

@@ -9,9 +9,11 @@ yarn install
 ```
 
 ```
-yarn start
+yarn dev
 ```
 
 ```
-yarn build
+yarn build && yarn start
 ```
+
+Copy `.env.local.example` to `.env.local` and fill in the Supabase project URL and anon key.

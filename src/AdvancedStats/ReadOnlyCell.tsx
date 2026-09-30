@@ -1,15 +1,13 @@
-import { Cell } from 'react-table';
 import { StyledCell } from '../styles';
 import { StatType } from './types';
 
 interface Props {
-  cell: Cell<StatType>;
+  value: StatType['q1'];
 }
 
-const ReadOnlyCell: React.FC<Props> = ({ cell }: Props) => {
-  const { value } = cell;
+const ReadOnlyCell: React.FC<Props> = ({ value }: Props) => {
   return (
-    <StyledCell readOnly>
+    <StyledCell $readOnly>
       {typeof value === 'number' ? (
         <span>{value}</span>
       ) : (
