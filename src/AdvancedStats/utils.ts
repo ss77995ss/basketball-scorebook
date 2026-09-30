@@ -1,17 +1,18 @@
 import { omit } from 'ramda';
+import { StatType } from './types';
 
-export const getTotal: (rowData: Record<string, string>) => number = rowData => {
-  const quarterStats: Array<string> = Object.values(omit(['statInfo', 'total'], rowData));
-  const sum = quarterStats.reduce((acc, current) => acc + parseInt(current, 10), 0);
+export const getTotal: (row: StatType) => number = (row) => {
+  const quarterStats = Object.values(omit(['statInfo', 'total'], row)) as Array<number>;
+  const sum = quarterStats.reduce((acc, current) => acc + current, 0);
 
   return sum;
 };
 
-export const getTotalWithCount: (rowData: Record<string, { count: number; points: number;}>) => string = rowData => {
-  const quarterStats: Array<{
+export const getTotalWithCount: (row: StatType) => string = (row) => {
+  const quarterStats = Object.values(omit(['statInfo', 'total'], row)) as Array<{
     count: number;
     points: number;
-  }> = Object.values(omit(['statInfo', 'total'], rowData));
+  }>;
 
   const sum = quarterStats.reduce(
     ({ count: accCount, points: accPoints }, { count: currentCount, points: currentPoints }) => {

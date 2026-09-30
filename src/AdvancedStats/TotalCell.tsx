@@ -1,16 +1,15 @@
-import { Row } from 'react-table';
 import { StatType } from './types';
 import { getTotal } from './utils';
 import { StyledCell } from '../styles';
 
 interface Props {
-  row: Row<StatType>;
+  row: StatType;
 }
 
 const TotalCell: React.FC<Props> = ({ row }: Props) => {
   return (
-    <StyledCell readOnly>
-      <span>{getTotal(row.values)}</span>
+    <StyledCell $readOnly>
+      <span>{getTotal(row)}</span>
     </StyledCell>
   );
 };

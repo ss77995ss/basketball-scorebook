@@ -1,43 +1,35 @@
 import { useRef } from 'react';
-import { Cell } from 'react-table';
 import { useSwipeable } from 'react-swipeable';
-import { isMobile } from 'react-device-detect';
+import { useMedia } from 'react-use';
 import { StyledCell } from '../styles';
-import { useStatsDispatch } from './hooks/statData';
-import { StatType } from './types';
+import { StatValueType, useStatsDispatch } from './hooks/statData';
 
 interface Props {
-  cell: Cell<StatType>;
+  value: { count: number; points: number };
+  rowIndex: number;
+  columnId: string;
   team: string;
   isSwipeable: boolean;
 }
 
-const StatCellWithCount: React.FC<Props> = ({ cell, team, isSwipeable }: Props) => {
-  const {
-    value,
-    row: { index },
-    column: { id = '' },
-  } = cell;
+const StatCellWithCount: React.FC<Props> = ({ value, rowIndex, columnId, team, isSwipeable }: Props) => {
   const { count, points } = value;
-  const pointsClickTimeout = useRef<number>();
-  const countClickTimeout = useRef<number>();
+  // touch devices drive the cell by swipe, so mouse tracking is only for pointer devices
+  const isTouch = useMedia('(pointer: coarse)', false);
+  const pointsClickTimeout = useRef<number | undefined>(undefined);
+  const countClickTimeout = useRef<number | undefined>(undefined);
   const pointsClickCount = useRef<number>(0);
   const countClickCount = useRef<number>(0);
 
   const statsDispatch = useStatsDispatch();
 
-  const updateStats: (
-    value:
-      | { count: number; points: number }
-      | number
-      | { name: string; title: string | { points: string; count: string } },
-  ) => void = (value) => {
+  const updateStats: (value: StatValueType) => void = (value) => {
     statsDispatch({
       type: 'UPDATE_CELL',
       params: {
         team,
-        rowIndex: index,
-        columnId: id,
+        rowIndex,
+        columnId,
         value,
       },
     });
@@ -56,8 +48,8 @@ const StatCellWithCount: React.FC<Props> = ({ cell, team, isSwipeable }: Props) 
     onSwipedRight: () => {
       updateStats({ points: points + 2, count: count + 1 });
     },
-    preventDefaultTouchmoveEvent: true,
-    trackMouse: isMobile ? false : true,
+    preventScrollOnSwipe: true,
+    trackMouse: !isTouch,
   });
 
   const handlePointsClick = (): void => {
@@ -89,7 +81,7 @@ const StatCellWithCount: React.FC<Props> = ({ cell, team, isSwipeable }: Props) 
   };
 
   return (
-    <StyledCell {...(isSwipeable && handlers)} readOnly={false}>
+    <StyledCell {...(isSwipeable && handlers)} $readOnly={false}>
       <span onClick={handlePointsClick}>{points}</span>
       <hr />
       <span onClick={handleCountClick}>{count}</span>

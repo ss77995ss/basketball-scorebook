@@ -1,4 +1,5 @@
-import { Column } from 'react-table';
+import { createColumnHelper } from '@tanstack/react-table';
+import { features } from '../tableFeatures';
 import { TurnoverCategoriesType } from './types';
 
 export const TURNOVER_CATEGORIES = {
@@ -29,40 +30,18 @@ export const TURNOVER_SUB_CATEGORIES_NAME = {
   lostPoints: '失分',
 };
 
-export const columns: Array<Column<TurnoverCategoriesType>> = [
-  {
-    Header: '名字',
-    accessor: 'playerName',
-  },
-  {
-    Header: 'Drop',
-    accessor: 'drop',
-  },
-  {
-    Header: '非攻擊性傳球',
-    accessor: 'nonOffensivePass',
-  },
-  {
-    Header: '攻擊性傳球',
-    accessor: 'offensivePass',
-  },
-  {
-    Header: '禁區傳球',
-    accessor: 'paintPass',
-  },
-  {
-    Header: '其他失誤',
-    accessor: 'others',
-  },
-  {
-    Header: '總計次數',
-    accessor: 'totalTurnovers',
-  },
-  {
-    Header: '總失分',
-    accessor: 'totalLostPoints',
-  },
-];
+const helper = createColumnHelper<typeof features, TurnoverCategoriesType>();
+
+export const columns = helper.columns([
+  helper.accessor('playerName', { header: '名字' }),
+  helper.accessor('drop', { header: 'Drop' }),
+  helper.accessor('nonOffensivePass', { header: '非攻擊性傳球' }),
+  helper.accessor('offensivePass', { header: '攻擊性傳球' }),
+  helper.accessor('paintPass', { header: '禁區傳球' }),
+  helper.accessor('others', { header: '其他失誤' }),
+  helper.accessor('totalTurnovers', { header: '總計次數' }),
+  helper.accessor('totalLostPoints', { header: '總失分' }),
+]);
 
 export const defaultPlayers = [
   '許致銓',
@@ -126,7 +105,7 @@ export const initialSingleData = {
   totalLostPoints: 0,
 };
 
-export const initialTurnoverData: Array<TurnoverCategoriesType> = defaultPlayers.map(playerName => {
+export const initialTurnoverData: Array<TurnoverCategoriesType> = defaultPlayers.map((playerName) => {
   return {
     ...initialSingleData,
     playerName,
