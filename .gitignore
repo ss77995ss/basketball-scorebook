@@ -37,6 +37,9 @@ build
 node_modules/
 jspm_packages/
 
+# TypeScript incremental build cache
+*.tsbuildinfo
+
 # TypeScript v1 declaration files
 typings/
 

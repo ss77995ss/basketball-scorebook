@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { StyledTable } from '../styles';
 import { DEFENSE_KEYS, DEFENSE_TYPES, PERIODS, RESULTS } from './constants';
 import { DefenseKey, Period, Possession } from './types';
-import { countThreeStops } from './utils';
+import { findThreeStops } from './utils';
 
 const StyledEditModeRoot = styled.section`
   fieldset {
@@ -85,24 +85,47 @@ const StyledLogTable = styled(StyledTable)`
   }
 
   li {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 4px 4px 4px 10px;
-    border: 1px solid;
+    border: 2px solid;
     border-radius: 16px;
   }
 
-  li[data-contested='true'] {
+  li[data-scored='false'] {
     background: #edf2ff;
     border-color: #3b5bdb;
     color: #1c3a9e;
   }
 
-  li[data-contested='false'] {
+  li[data-scored='true'] {
     background: #fff0f0;
     border-color: #e03131;
     color: #a51111;
+  }
+
+  li[data-contested='false'] {
+    border-style: dashed;
+    background: transparent;
+  }
+
+  /* highlighter stroke over the chip, like the yellow marker on the paper sheet */
+  li[data-stop]::after {
+    content: '';
+    position: absolute;
+    top: 20%;
+    bottom: 20%;
+    left: 0;
+    right: 0;
+    background: rgb(255 212 59 / 0.6);
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+
+  li[data-stop='mid']::after {
+    right: -6px; /* = ul gap, joins the next chip's stroke */
   }
 
   li button {
@@ -207,33 +230,44 @@ const EditMode: React.FC<Props> = ({ possessions, setPossessions }: Props) => {
           <tbody>
             {PERIODS.map((value) => {
               const list = possessions.filter((possession) => possession.period === value);
+              const stops = findThreeStops(list);
 
               return (
                 <tr key={value}>
                   <td>{value}</td>
                   <td>
                     <ul>
-                      {list.map((possession, index) => (
-                        <li key={index} data-contested={possession.contested}>
-                          {`${index + 1}. ${DEFENSE_TYPES[possession.defense].code}/${possession.result}/${possession.points}${possession.contested ? '' : '*'}`}
-                          <button
-                            type="button"
-                            aria-label={`刪除第 ${index + 1} 波`}
-                            onClick={handleDelete(possession)}
+                      {list.map((possession, index) => {
+                        const group = stops.find((indices) => indices.includes(index));
+
+                        return (
+                          <li
+                            key={index}
+                            data-scored={possession.points > 0}
+                            data-contested={possession.contested}
+                            // 'mid' strokes reach across the gap to the next chip; 'end' stops so back-to-back 3 stops stay apart
+                            data-stop={group && (index === group.at(-1) ? 'end' : 'mid')}
                           >
-                            ×
-                          </button>
-                        </li>
-                      ))}
+                            {`${index + 1}. ${DEFENSE_TYPES[possession.defense].code}/${possession.result}/${possession.points}${possession.contested ? '' : '*'}`}
+                            <button
+                              type="button"
+                              aria-label={`刪除第 ${index + 1} 波`}
+                              onClick={handleDelete(possession)}
+                            >
+                              ×
+                            </button>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </td>
-                  <td>{countThreeStops(list)}</td>
+                  <td>{stops.length}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
-        <small>藍色 = 有守到，紅色 * = 沒守到</small>
+        <small>紅色 = 被得分，藍色 = 沒被得分；虛線空心 * = 沒守到；黃色螢光線 = 3 stop</small>
       </StyledLogTable>
     </StyledEditModeRoot>
   );

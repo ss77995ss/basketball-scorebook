@@ -31,17 +31,27 @@ export const summarize = (list: Possession[]): Array<number | string> => {
 };
 
 // 3 scoreless possessions in a row = one 3 stop; the streak restarts after each one
-export const countThreeStops = (list: Possession[]): number => {
-  let streak = 0;
-  let count = 0;
+// returns the indices of each 3 stop; the 1-2 extra stops of an unbroken run stay on the 3 stop before them,
+// so 5 in a row = [[0, 1, 2, 3, 4]] and 6 in a row = [[0, 1, 2], [3, 4, 5]]
+export const findThreeStops = (list: Possession[]): number[][] => {
+  const stops: number[][] = [];
+  let streak: number[] = [];
 
-  for (const { points } of list) {
-    streak = points ? 0 : streak + 1;
-    if (streak === 3) {
-      count += 1;
-      streak = 0;
+  const flush = (): void => {
+    const last = stops.at(-1);
+    if (last && last.at(-1) === streak[0] - 1) last.push(...streak);
+    streak = [];
+  };
+
+  list.forEach(({ points }, index) => {
+    if (points) {
+      flush();
+    } else if (streak.push(index) === 3) {
+      stops.push(streak);
+      streak = [];
     }
-  }
+  });
+  flush();
 
-  return count;
+  return stops;
 };
