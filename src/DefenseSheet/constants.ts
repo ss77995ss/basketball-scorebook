@@ -14,16 +14,29 @@ export const DEFENSE_TYPES = {
 
 export const DEFENSE_KEYS = Object.keys(DEFENSE_TYPES) as Array<keyof typeof DEFENSE_TYPES>;
 
-export const RESULTS = [
-  { label: '2分進', points: 2 },
-  { label: '2分不進', points: 0 },
-  { label: '2分and1', points: 3 },
-  { label: '3分進', points: 3 },
-  { label: '3分不進', points: 0 },
-  { label: '3分and1', points: 4 },
-  { label: '罰球進0', points: 0 },
-  { label: '罰球進1', points: 1 },
-  { label: '罰球進2', points: 2 },
-  { label: '罰球進3', points: 3 },
-  { label: '失誤', points: 0 },
+// one row of buttons per group: 盯人 / 區域 + 被快攻
+export const DEFENSE_ROWS: Array<Array<keyof typeof DEFENSE_TYPES>> = [
+  ['soft', 'yellow', 'red', 'purple'],
+  ['open', 'lock', 'spider', 'fastBreak'],
+];
+
+// one row of buttons per group
+export const RESULT_GROUPS = [
+  [
+    { label: '2分進', points: 2 },
+    { label: '2分不進', points: 0 },
+    { label: '2分and1', points: 3 },
+  ],
+  [
+    { label: '3分進', points: 3 },
+    { label: '3分不進', points: 0 },
+    { label: '3分and1', points: 4 },
+  ],
+  [
+    { label: '罰球進0', points: 0 },
+    { label: '罰球進1', points: 1 },
+    { label: '罰球進2', points: 2 },
+    { label: '罰球進3', points: 3 },
+  ],
+  [{ label: '失誤', points: 0 }],
 ];

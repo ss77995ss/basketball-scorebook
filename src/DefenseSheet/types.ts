@@ -7,7 +7,7 @@ export type Possession = {
   period: Period;
   defense: DefenseKey;
   result: string;
-  // stored rather than looked up from RESULTS so saved games never change if the table does
+  // stored rather than looked up from RESULT_GROUPS so saved games never change if the table does
   points: number;
   contested: boolean;
 };
