@@ -28,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <nav>
                 <Link href="/">進階數據紀錄表</Link>
                 <Link href="/turnover">失誤記錄表</Link>
+                <Link href="/defense">防守數據</Link>
                 <Link href="/playerlist">球員名單</Link>
               </nav>
             </header>
