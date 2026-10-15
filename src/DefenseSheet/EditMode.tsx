@@ -436,7 +436,8 @@ const EditMode: React.FC<Props> = ({ possessions, setPossessions }: Props) => {
             </tr>
           </thead>
           <tbody>
-            {PERIODS.map((value) => {
+            {/* the selected period leads, the rest keep their order */}
+            {[period, ...PERIODS.filter((value) => value !== period)].map((value) => {
               const list = possessions.filter((possession) => possession.period === value);
               const stops = findThreeStops(list);
 
