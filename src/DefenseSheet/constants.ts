@@ -14,7 +14,6 @@ export const DEFENSE_TYPES = {
 
 export const DEFENSE_KEYS = Object.keys(DEFENSE_TYPES) as Array<keyof typeof DEFENSE_TYPES>;
 
-// one row of buttons per group: 盯人 / 區域 + 被快攻
 export const DEFENSE_ROWS: Array<Array<keyof typeof DEFENSE_TYPES>> = [
   ['soft', 'yellow', 'red', 'purple'],
   ['open', 'lock', 'spider', 'fastBreak'],

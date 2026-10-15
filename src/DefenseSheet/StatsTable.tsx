@@ -16,7 +16,6 @@ const StyledStatsTable = styled(StyledTable)`
 
 const COLUMN_LABELS = [...DEFENSE_KEYS.map((key) => DEFENSE_TYPES[key].label), '全場'];
 
-// one summarize() result per column, in COLUMN_LABELS order
 const summarizeColumns = (list: Possession[]): Array<Array<number | string>> => [
   ...DEFENSE_KEYS.map((key) => summarize(list.filter((possession) => possession.defense === key))),
   summarize(list),

@@ -5,6 +5,7 @@ import EditMode from './EditMode';
 import MatchDrawer from './MatchDrawer';
 import StatsTable from './StatsTable';
 import { Game } from './types';
+import { findResumable } from './utils';
 
 const StyledRoot = styled.section`
   text-align: center;
@@ -28,8 +29,9 @@ const newGameId = (): string => Date.now().toString(36);
 // ponytail: history lives in localStorage for now; Game is shaped to become a Supabase row later
 const DefenseSheet: React.FC = () => {
   const [games = [], setGames] = useLocalStorage<Game[]>('defenseGames', []);
-  // every visit opens a fresh match; it is only saved once something is recorded or named
-  const [gameId, setGameId] = useState(newGameId);
+  // coming back mid-game (tab switch, reload, PWA evicted) reopens the match still being recorded;
+  // otherwise a fresh match, only saved once something is recorded or named
+  const [gameId, setGameId] = useState(() => findResumable(games)?.id ?? newGameId());
   const [mode, setMode] = useState('編輯');
 
   // keep the tablet awake courtside; the browser drops the lock whenever the tab is hidden, so re-request on return
@@ -56,12 +58,14 @@ const DefenseSheet: React.FC = () => {
 
   const game: Game = games.find(({ id }) => id === gameId) ?? { id: gameId, name: '', createdAt: '', possessions: [] };
 
-  const updateGame = (patch: Partial<Game>): void =>
+  const updateGame = (patch: Partial<Game>): void => {
+    const updatedAt = new Date().toISOString();
     setGames(
       games.some(({ id }) => id === game.id)
-        ? games.map((item) => (item.id === game.id ? { ...item, ...patch } : item))
-        : [{ ...game, createdAt: new Date().toISOString(), ...patch }, ...games],
+        ? games.map((item) => (item.id === game.id ? { ...item, ...patch, updatedAt } : item))
+        : [{ ...game, createdAt: updatedAt, ...patch, updatedAt }, ...games],
     );
+  };
 
   // deleting the open match leaves gameId pointing at nothing, which is just an empty new match
   const handleDeleteGame = (target: Game): void => {
@@ -79,7 +83,10 @@ const DefenseSheet: React.FC = () => {
           games={games}
           gameId={game.id}
           onSelect={setGameId}
-          onNew={(): void => setGameId(newGameId())}
+          onNew={(): void => {
+            setGameId(newGameId());
+            setMode('編輯');
+          }}
           onDelete={handleDeleteGame}
         />
         <label>

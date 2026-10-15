@@ -48,6 +48,12 @@ const StyledDrawer = styled.dialog`
     text-align: left;
   }
 
+  li small {
+    display: block;
+    color: #868e96;
+    font-weight: normal;
+  }
+
   li button[aria-current='true'] {
     color: #3b5bdb;
     font-weight: bold;
@@ -92,6 +98,15 @@ const MatchDrawer: React.FC<Props> = ({ games, gameId, onSelect, onNew, onDelete
                 <li key={game.id}>
                   <button type="button" aria-current={game.id === gameId} onClick={closeAfter(() => onSelect(game.id))}>
                     {`${new Date(game.createdAt).toLocaleDateString('zh-TW')} vs ${game.name || '對手'}`}
+                    <small>
+                      {`最後更新 ${new Date(game.updatedAt ?? game.createdAt).toLocaleString('zh-TW', {
+                        month: 'numeric',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                      })}`}
+                    </small>
                   </button>
                   <button
                     type="button"

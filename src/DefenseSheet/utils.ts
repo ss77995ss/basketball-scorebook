@@ -1,4 +1,4 @@
-import type { Possession } from './types';
+import type { Game, Possession } from './types';
 
 export const STAT_LABELS = [
   '總失分',
@@ -54,4 +54,14 @@ export const findThreeStops = (list: Possession[]): number[][] => {
   flush();
 
   return stops;
+};
+
+// ponytail: 3h ≈ one game plus warm-up and breaks; make it a setting if tournaments need longer
+const RESUME_MS = 3 * 60 * 60 * 1000;
+
+const touchedAt = (game: Game): number => Date.parse(game.updatedAt ?? game.createdAt);
+
+export const findResumable = (games: Game[], now = Date.now()): Game | undefined => {
+  const latest = games.reduce<Game | undefined>((a, b) => (a && touchedAt(a) >= touchedAt(b) ? a : b), undefined);
+  return latest && now - touchedAt(latest) < RESUME_MS ? latest : undefined;
 };

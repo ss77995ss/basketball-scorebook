@@ -16,5 +16,7 @@ export type Game = {
   id: string;
   name: string;
   createdAt: string;
+  // optional: games saved before this field existed don't have it
+  updatedAt?: string;
   possessions: Possession[];
 };

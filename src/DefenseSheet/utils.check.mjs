@@ -1,6 +1,6 @@
 // run: node src/DefenseSheet/utils.check.mjs
 import assert from 'node:assert/strict';
-import { findThreeStops, summarize } from './utils.ts';
+import { findResumable, findThreeStops, summarize } from './utils.ts';
 
 const p = (points, contested = true) => ({ period: 'Q1', defense: 'red', result: '', points, contested });
 
@@ -23,5 +23,23 @@ assert.deepEqual(findThreeStops([0, 0, 0, 0, 0, 0, 0].map((pts) => p(pts))), [
 assert.equal(summarize([2, 3, 0, 0, 0, 0, 0, 0, 0, 0].map((pts) => p(pts)))[2], 50);
 assert.deepEqual(summarize([p(2, false), p(0, false), p(3), p(0)]), [5, 4, 125, 2, 1, 200, 3, 1, 300]);
 assert.deepEqual(summarize([]), [0, 0, '-', 0, 0, '-', 0, 0, '-']);
+
+// reopen the most recently touched match, not the newest created one, and only within 3h
+const now = Date.parse('2026-10-15T12:00:00Z');
+const g = (id, createdAt, updatedAt) => ({ id, name: '', createdAt, updatedAt, possessions: [] });
+assert.equal(
+  findResumable(
+    [
+      g('new', '2026-10-15T10:00:00Z', '2026-10-15T10:30:00Z'),
+      g('old', '2026-10-14T10:00:00Z', '2026-10-15T11:00:00Z'),
+    ],
+    now,
+  )?.id,
+  'old',
+);
+assert.equal(findResumable([g('a', '2026-10-15T08:00:00Z', '2026-10-15T08:59:00Z')], now), undefined);
+// games saved before updatedAt existed fall back to createdAt
+assert.equal(findResumable([g('a', '2026-10-15T11:00:00Z')], now)?.id, 'a');
+assert.equal(findResumable([], now), undefined);
 
 console.log('ok');

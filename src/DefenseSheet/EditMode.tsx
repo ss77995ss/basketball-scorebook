@@ -21,7 +21,6 @@ const StyledEditModeRoot = styled.section`
     }
   }
 
-  /* each group is a card */
   fieldset {
     margin: 0 0 12px;
     padding: 8px;
@@ -76,7 +75,6 @@ const StyledEditModeRoot = styled.section`
     user-select: none;
   }
 
-  /* same red/blue as the log chips: red gives up points */
   fieldset button[data-scored='true'] {
     background: #fff0f0;
     border-color: #e03131;
@@ -135,7 +133,6 @@ const StyledEditModeRoot = styled.section`
     cursor: pointer;
   }
 
-  /* the possession undo would remove */
   fieldset + button small {
     color: #868e96;
     font-size: 0.875em;
@@ -150,7 +147,6 @@ const StyledEditModeRoot = styled.section`
     cursor: default;
   }
 
-  /* same orange as the result legend while editing */
   fieldset + button[data-editing='true'] {
     border-color: #f08c00;
     color: #e8590c;
@@ -243,7 +239,6 @@ const StyledLogTable = styled(StyledTable)`
     right: -6px; /* = ul gap, joins the next chip's stroke */
   }
 
-  /* same orange as the result legend while editing */
   li[data-editing='true'] {
     outline: 3px solid #f08c00;
     outline-offset: 2px;
@@ -282,7 +277,6 @@ const StyledLogTable = styled(StyledTable)`
   }
 `;
 
-// e.g. "R/2分進/2", with * when it wasn't contested
 const describe = ({ defense, result, points, contested }: Possession): string =>
   `${DEFENSE_TYPES[defense].code}/${result}/${points}${contested ? '' : '*'}`;
 
